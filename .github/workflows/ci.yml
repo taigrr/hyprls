@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  go:
+    name: Go test + build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: true
+
+      - run: go build ./...
+      - run: go test ./...
+
+      - name: Regenerate stub and ensure it is up to date
+        run: |
+          go run ./cmd/gen-lua library/hl.config.meta.lua
+          if ! git diff --exit-code -- library/hl.config.meta.lua; then
+            echo "::error::library/hl.config.meta.lua is out of date. Run 'just gen' and commit." >&2
+            exit 1
+          fi
+
+  stylua:
+    name: stylua
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: JohnnyMorganz/stylua-action@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          version: latest
+          args: --check examples library/hl.config.meta.lua
+
+  lua-ls:
+    name: lua-language-server check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install lua-language-server
+        run: |
+          set -euo pipefail
+          VERSION="3.13.6"
+          curl -fsSL -o /tmp/luals.tar.gz \
+            "https://github.com/LuaLS/lua-language-server/releases/download/${VERSION}/lua-language-server-${VERSION}-linux-x64.tar.gz"
+          mkdir -p "$HOME/.luals"
+          tar -xzf /tmp/luals.tar.gz -C "$HOME/.luals"
+          echo "$HOME/.luals/bin" >> "$GITHUB_PATH"
+
+      - run: lua-language-server --version
+      - run: ./scripts/check-lua.sh

@@ -1,0 +1,416 @@
+---@meta
+-- HL.Config — typed schema for the table accepted by hl.config({...}).
+--
+-- Auto-generated from the bundled Hyprland wiki by cmd/gen-lua.
+-- The canonical hl.* API is provided by library/hl.meta.lua, generated
+-- upstream by Hyprland's own meta/generateLuaStubs.py. This file augments
+-- that stub with rich, per-option documentation for hl.config().
+--
+-- See https://wiki.hypr.land/Configuring/Configuring-Hyprland/
+
+---@class (exact) HL.Config.General.snap
+---@field enabled? boolean enable snapping for floating windows (default: `false`)
+---@field window_gap? integer|boolean minimum gap in pixels between windows before snapping (default: `10`)
+---@field monitor_gap? integer|boolean minimum gap in pixels between window and monitor edges before snapping (default: `10`)
+---@field border_overlap? boolean if true, windows snap such that only one border's worth of space is between them (default: `false`)
+---@field respect_gaps? boolean if true, snapping will respect gaps between windows(set in general:gaps_in) (default: `false`)
+
+---@class (exact) HL.Config.Decoration.blur
+---@field enabled? boolean enable kawase window background blur (default: `true`)
+---@field size? integer|boolean blur size (distance) (default: `8`)
+---@field passes? integer|boolean the amount of passes to perform (default: `1`)
+---@field ignore_opacity? boolean make the blur layer ignore the opacity of the window (default: `true`)
+---@field new_optimizations? boolean whether to enable further optimizations to the blur. Recommended to leave on, as it will massively improve performance. (default: `true`)
+---@field xray? boolean if enabled, floating windows will ignore tiled windows in their blur. Only available if new_optimizations is true. Will reduce overhead on floating blur significantly. (default: `false`)
+---@field noise? number|boolean how much noise to apply. [0.0 - 1.0] (default: `0.0117`)
+---@field contrast? number|boolean contrast modulation for blur. [0.0 - 2.0] (default: `0.8916`)
+---@field brightness? number|boolean brightness modulation for blur. [0.0 - 2.0] (default: `0.8172`)
+---@field vibrancy? number|boolean Increase saturation of blurred colors. [0.0 - 1.0] (default: `0.1696`)
+---@field vibrancy_darkness? number|boolean How strong the effect of vibrancy is on dark areas . [0.0 - 1.0] (default: `0.0`)
+---@field special? boolean whether to blur behind the special workspace (note: expensive) (default: `false`)
+---@field popups? boolean whether to blur popups (e.g. right-click menus) (default: `false`)
+---@field popups_ignorealpha? number|boolean works like ignore_alpha in layer rules. If pixel opacity is below set value, will not blur. [0.0 - 1.0] (default: `0.2`)
+---@field input_methods? boolean whether to blur input methods (e.g. fcitx5) (default: `false`)
+---@field input_methods_ignorealpha? number|boolean works like ignore_alpha in layer rules. If pixel opacity is below set value, will not blur. [0.0 - 1.0] (default: `0.2`)
+
+---@class (exact) HL.Config.Decoration.shadow
+---@field enabled? boolean enable drop shadows on windows (default: `true`)
+---@field range? integer|boolean Shadow range ("size") in layout px (default: `4`)
+---@field render_power? integer|boolean in what power to render the falloff (more power, the faster the falloff) [1 - 4] (default: `3`)
+---@field sharp? boolean if enabled, will make the shadows sharp, akin to an infinite render power (default: `false`)
+---@field ignore_window? boolean if true, the shadow will not be rendered behind the window itself, only around it. (default: `true`)
+---@field color? string shadow's color. Alpha dictates shadow's opacity. (default: `0xee1a1a1a`)
+---@field color_inactive? string inactive shadow color. (if not set, will fall back to color) (default: `unset`)
+---@field offset? HL.Vec2Like shadow's rendering offset. (default: `[0, 0]`)
+---@field scale? number|boolean shadow's scale. [0.0 - 1.0] (default: `1.0`)
+
+---@class (exact) HL.Config.Input.touchpad
+---@field disable_while_typing? boolean Disable the touchpad while typing. (default: `true`)
+---@field natural_scroll? boolean Inverts scrolling direction. When enabled, scrolling moves content directly, rather than manipulating a scrollbar. (default: `false`)
+---@field scroll_factor? number|boolean Multiplier applied to the amount of scroll movement. (default: `1.0`)
+---@field middle_button_emulation? boolean Sending LMB and RMB simultaneously will be interpreted as a middle click. This disables any touchpad area that would normally send a middle click based on location. libinput#middle-button-emulation (default: `false`)
+---@field tap_button_map? string Sets the tap button mapping for touchpad button emulation. Can be one of lrm (default) or lmr (Left, Middle, Right Buttons). [lrm/lmr]
+---@field clickfinger_behavior? boolean Button presses with 1, 2, or 3 fingers will be mapped to LMB, RMB, and MMB respectively. This disables interpretation of clicks based on location on the touchpad. libinput#clickfinger-behavior (default: `false`)
+---@field tap-to-click? boolean Tapping on the touchpad with 1, 2, or 3 fingers will send LMB, RMB, and MMB respectively. (default: `true`)
+---@field drag_lock? integer|boolean When enabled, lifting the finger off while dragging will not drop the dragged item. 0 -> disabled, 1 -> enabled with timeout, 2 -> enabled sticky. libinput#tap-and-drag (default: `0`)
+---@field tap-and-drag? boolean Sets the tap and drag mode for the touchpad (default: `true`)
+---@field flip_x? boolean inverts the horizontal movement of the touchpad (default: `false`)
+---@field flip_y? boolean inverts the vertical movement of the touchpad (default: `false`)
+---@field drag_3fg? integer|boolean enables three finger drag, 0 -> disabled, 1 -> 3 fingers, 2 -> 4 fingers libinput#drag-3fg (default: `0`)
+
+---@class (exact) HL.Config.Input.touchdevice
+---@field transform? integer|boolean Transform the input from touchdevices. The possible transformations are the same as those of the monitors. -1 means it's unset. (default: `-1`)
+---@field output? string The monitor to bind touch devices. The default is auto-detection. To stop auto-detection, use an empty string or the "[[Empty]]" value. (default: `[[Auto]]`)
+---@field enabled? boolean Whether input is enabled for touch devices. (default: `true`)
+
+---@class (exact) HL.Config.Input.virtualkeyboard
+---@field share_states? integer|boolean Unify key down states and modifier states with other keyboards. 0 -> no, 1 -> yes, 2 -> yes unless IME client (default: `2`)
+---@field release_pressed_on_close? boolean Release all pressed keys by virtual keyboard on close. (default: `false`)
+
+---@class (exact) HL.Config.Input.tablet
+---@field transform? integer|boolean transform the input from tablets. The possible transformations are the same as those of the monitors. -1 means it's unset. (default: `-1`)
+---@field output? string the monitor to bind tablets. Can be current or a monitor name. Leave empty to map across all monitors.
+---@field region_position? HL.Vec2Like position of the mapped region in monitor layout relative to the top left corner of the bound monitor or all monitors. (default: `[0, 0]`)
+---@field absolute_region_position? boolean whether to treat the region_position as an absolute position in monitor layout. Only applies when output is empty. (default: `false`)
+---@field region_size? HL.Vec2Like size of the mapped region. When this variable is set, tablet input will be mapped to the region. [0, 0] or invalid size means unset. (default: `[0, 0]`)
+---@field relative_input? boolean whether the input should be relative (default: `false`)
+---@field left_handed? boolean if enabled, the tablet will be rotated 180 degrees (default: `false`)
+---@field active_area_size? HL.Vec2Like size of tablet's active area in mm (default: `[0, 0]`)
+---@field active_area_position? HL.Vec2Like position of the active area in mm (default: `[0, 0]`)
+
+---@class (exact) HL.Config.Group.groupbar.col
+---@field active? string|HL.Gradient active group bar background color (default: `0x66ffff00`)
+---@field inactive? string|HL.Gradient inactive (out of focus) group bar background color (default: `0x66777700`)
+---@field locked_active? string|HL.Gradient active locked group bar background color (default: `0x66ff5500`)
+---@field locked_inactive? string|HL.Gradient inactive locked group bar background color (default: `0x66775500`)
+
+---@class (exact) HL.Config.Group.groupbar
+---@field enabled? boolean enables groupbars (default: `true`)
+---@field font_family? string font used to display groupbar titles, use misc:font_family if not specified
+---@field font_size? integer|boolean font size of groupbar title (default: `8`)
+---@field font_weight_active? integer|string font weight of active groupbar title (default: `normal`)
+---@field font_weight_inactive? integer|string font weight of inactive groupbar title (default: `normal`)
+---@field gradients? boolean enables gradients (default: `false`)
+---@field height? integer|boolean height of the groupbar (default: `14`)
+---@field indicator_gap? integer|boolean height of gap between groupbar indicator and title (default: `0`)
+---@field indicator_height? integer|boolean height of the groupbar indicator (default: `3`)
+---@field stacked? boolean render the groupbar as a vertical stack (default: `false`)
+---@field priority? integer|boolean sets the decoration priority for groupbars (default: `3`)
+---@field render_titles? boolean whether to render titles in the group bar decoration (default: `true`)
+---@field text_offset? integer|boolean adjust vertical position for titles (default: `0`)
+---@field text_padding? integer|boolean set horizontal padding for titles (default: `0`)
+---@field scrolling? boolean whether scrolling in the groupbar changes group active window (default: `true`)
+---@field rounding? integer|boolean how much to round the indicator (default: `1`)
+---@field rounding_power? number|boolean adjusts the curve used for rounding groupbar corners, larger is smoother, 2.0 is a circle, 4.0 is a squircle, 1.0 is a triangular corner. [1.0 - 10.0] (default: `2.0`)
+---@field gradient_rounding? integer|boolean how much to round the gradients (default: `2`)
+---@field gradient_rounding_power? number|boolean adjusts the curve used for rounding gradient corners, larger is smoother, 2.0 is a circle, 4.0 is a squircle, 1.0 is a triangular corner. [1.0 - 10.0] (default: `2.0`)
+---@field round_only_edges? boolean round only the indicator edges of the entire groupbar (default: `true`)
+---@field gradient_round_only_edges? boolean round only the gradient edges of the entire groupbar (default: `true`)
+---@field text_color? string color for window titles in the groupbar (default: `0xffffffff`)
+---@field text_color_inactive? string color for inactive windows' titles in the groupbar (if unset, defaults to text_color) (default: `unset`)
+---@field text_color_locked_active? string color for the active window's title in a locked group (if unset, defaults to text_color) (default: `unset`)
+---@field text_color_locked_inactive? string color for inactive windows' titles in locked groups (if unset, defaults to text_color_inactive) (default: `unset`)
+---@field gaps_in? integer|boolean gap size between gradients (default: `2`)
+---@field gaps_out? integer|boolean gap size between gradients and window (default: `2`)
+---@field keep_upper_gap? boolean add or remove upper gap (default: `true`)
+---@field blur? boolean applies blur to the groupbar indicators and gradients (default: `false`)
+---@field col? HL.Config.Group.groupbar.col
+
+---@class (exact) HL.Config.General.col
+---@field inactive_border? string|HL.Gradient border color for inactive windows (default: `0xff444444`)
+---@field active_border? string|HL.Gradient border color for the active window (default: `0xffffffff`)
+---@field nogroup_border? string|HL.Gradient inactive border color for window that cannot be added to a group (see denywindowfromgroup dispatcher) (default: `0xffffaaff`)
+---@field nogroup_border_active? string|HL.Gradient active border color for window that cannot be added to a group (default: `0xffff00ff`)
+
+---@class (exact) HL.Config.General
+---@field border_size? integer|boolean size of the border around windows (default: `1`)
+---@field gaps_in? integer|boolean gaps between windows, also supports css style gaps (top, right, bottom, left -> 5,10,15,20) (default: `5`)
+---@field gaps_out? integer|boolean gaps between windows and monitor edges, also supports css style gaps (top, right, bottom, left -> 5,10,15,20) (default: `20`)
+---@field float_gaps? integer|boolean gaps between windows and monitor edges for floating windows, also supports css style gaps (top, right, bottom, left -> 5 10 15 20). -1 means default (default: `0`)
+---@field gaps_workspaces? integer|boolean gaps between workspaces. Stacks with gaps_out. (default: `0`)
+---@field layout? string which layout to use. [dwindle/master/scrolling/monocle] (default: `dwindle`)
+---@field no_focus_fallback? boolean if true, will not fall back to the next available window when moving focus in a direction where no window was found (default: `false`)
+---@field resize_on_border? boolean enables resizing windows by clicking and dragging on borders and gaps (default: `false`)
+---@field extend_border_grab_area? integer|boolean extends the area around the border where you can click and drag on, only used when general:resize_on_border is on. (default: `15`)
+---@field hover_icon_on_border? boolean show a cursor icon when hovering over borders, only used when general:resize_on_border is on. (default: `true`)
+---@field allow_tearing? boolean master switch for allowing tearing to occur. See the Tearing page. (default: `false`)
+---@field resize_corner? integer|boolean force floating windows to use a specific corner when being resized (1-4 going clockwise from top left, 0 to disable) (default: `0`)
+---@field modal_parent_blocking? boolean whether parent windows of modals will be interactive (default: `true`)
+---@field locale? string overrides the system locale (e.g. en_US, es)
+---@field autogenerated? boolean Whether this configuration was autogenerated (default: `1`)
+---@field col? HL.Config.General.col
+---@field snap? HL.Config.General.snap
+
+---@class (exact) HL.Config.Decoration
+---@field rounding? integer|boolean rounded corners' radius (in layout px) (default: `0`)
+---@field rounding_power? number|boolean adjusts the curve used for rounding corners, larger is smoother, 2.0 is a circle, 4.0 is a squircle, 1.0 is a triangular corner. [1.0 - 10.0] (default: `2.0`)
+---@field active_opacity? number|boolean opacity of active windows. [0.0 - 1.0] (default: `1.0`)
+---@field inactive_opacity? number|boolean opacity of inactive windows. [0.0 - 1.0] (default: `1.0`)
+---@field fullscreen_opacity? number|boolean opacity of fullscreen windows. [0.0 - 1.0] (default: `1.0`)
+---@field dim_modal? boolean enables dimming of parents of modal windows (default: `true`)
+---@field dim_inactive? boolean enables dimming of inactive windows (default: `false`)
+---@field dim_strength? number|boolean how much inactive windows should be dimmed [0.0 - 1.0] (default: `0.5`)
+---@field dim_special? number|boolean how much to dim the rest of the screen by when a special workspace is open. [0.0 - 1.0] (default: `0.2`)
+---@field dim_around? number|boolean how much the dim_around window rule should dim by. [0.0 - 1.0] (default: `0.4`)
+---@field screen_shader? string a path to a custom shader to be applied at the end of rendering. See examples/screenShader.frag for an example.
+---@field border_part_of_window? boolean whether the window border should be a part of the window (default: `true`)
+---@field blur? HL.Config.Decoration.blur
+---@field shadow? HL.Config.Decoration.shadow
+
+---@class (exact) HL.Config.Animations
+---@field enabled? boolean enable animations (default: `true`)
+---@field workspace_wraparound? boolean enable workspace wraparound, causing directional workspace animations to animate as if the first and last workspaces were adjacent (default: `false`)
+
+---@class (exact) HL.Config.Input
+---@field kb_model? string Appropriate XKB keymap parameter. See the note below.
+---@field kb_layout? string Appropriate XKB keymap parameter (default: `us`)
+---@field kb_variant? string Appropriate XKB keymap parameter
+---@field kb_options? string Appropriate XKB keymap parameter
+---@field kb_rules? string Appropriate XKB keymap parameter
+---@field kb_file? string If you prefer, you can use a path to your custom .xkb file.
+---@field numlock_by_default? boolean Engage numlock by default. (default: `false`)
+---@field resolve_binds_by_sym? boolean Determines how keybinds act when multiple layouts are used. If false, keybinds will always act as if the first specified layout is active. If true, keybinds specified by symbols are activated when you… (default: `false`)
+---@field repeat_rate? integer|boolean The repeat rate for held-down keys, in repeats per second. (default: `25`)
+---@field repeat_delay? integer|boolean Delay before a held-down key is repeated, in milliseconds. (default: `600`)
+---@field sensitivity? number|boolean Sets the mouse input sensitivity. Value is clamped to the range -1.0 to 1.0. libinput#pointer-acceleration (default: `0.0`)
+---@field accel_profile? string Sets the cursor acceleration profile. Can be one of adaptive, flat. Can also be custom, see below. Leave empty to use libinput's default mode for your input device. libinput#pointer-acceleration [adap…
+---@field force_no_accel? boolean Force no cursor acceleration. This bypasses most of your pointer settings to get as raw of a signal as possible. Enabling this is not recommended due to potential cursor desynchronization. (default: `false`)
+---@field rotation? integer|boolean Sets the rotation of a device in degrees clockwise off the logical neutral position. Value is clamped to the range 0 to 359. (default: `0`)
+---@field left_handed? boolean Switches RMB and LMB (default: `false`)
+---@field scroll_points? string Sets the scroll acceleration profile, when accel_profile is set to custom. Has to be in the form <step> <points>. Leave empty to have a flat scroll curve.
+---@field scroll_method? string Sets the scroll method. Can be one of 2fg (2 fingers), edge, on_button_down, no_scroll. libinput#scrolling [2fg/edge/on_button_down/no_scroll]
+---@field scroll_button? integer|boolean Sets the scroll button. Has to be an int, cannot be a string. Check wev if you have any doubts regarding the ID. 0 means default. (default: `0`)
+---@field scroll_button_lock? boolean If the scroll button lock is enabled, the button does not need to be held down. Pressing and releasing the button toggles the button lock, which logically holds the button down or releases it. While t… (default: `false`)
+---@field scroll_factor? number|boolean Multiplier added to scroll movement for external mice. Note that there is a separate setting for touchpad scroll_factor. (default: `1.0`)
+---@field natural_scroll? boolean Inverts scrolling direction. When enabled, scrolling moves content directly, rather than manipulating a scrollbar. (default: `false`)
+---@field follow_mouse? integer|boolean Specify if and how cursor movement should affect window focus. See the note below. [0/1/2/3] (default: `1`)
+---@field follow_mouse_threshold? number|boolean The smallest distance in logical pixels the mouse needs to travel for the window under it to get focused. Works only with follow_mouse = 1. (default: `0.0`)
+---@field focus_on_close? integer|boolean Controls the window focus behavior when a window is closed. When set to 0, focus will shift to the next window candidate. When set to 1, focus will shift to the window under the cursor. [0/1] (default: `0`)
+---@field mouse_refocus? boolean If disabled, mouse focus won't switch to the hovered window unless the mouse crosses a window boundary when follow_mouse=1. (default: `true`)
+---@field float_switch_override_focus? integer|boolean If enabled (1 or 2), focus will change to the window under the cursor when changing from tiled-to-floating and vice versa. If 2, focus will also follow mouse on float-to-float switches. (default: `1`)
+---@field special_fallthrough? boolean if enabled, having only floating windows in the special workspace will not block focusing windows in the regular workspace. (default: `false`)
+---@field off_window_axis_events? integer|boolean Handles axis events around (gaps/border for tiled, dragarea/border for floated) a focused window. 0 ignores axis events 1 sends out-of-bound coordinates 2 fakes pointer coordinates to the closest poin… (default: `1`)
+---@field emulate_discrete_scroll? integer|boolean Emulates discrete scrolling from high resolution scrolling events. 0 disables it, 1 enables handling of non-standard events only, and 2 force enables all scroll wheel events to be handled (default: `1`)
+---@field tablet? HL.Config.Input.tablet
+---@field touchdevice? HL.Config.Input.touchdevice
+---@field touchpad? HL.Config.Input.touchpad
+---@field virtualkeyboard? HL.Config.Input.virtualkeyboard
+
+---@class (exact) HL.Config.Gestures
+---@field workspace_swipe_distance? integer|boolean in px, the distance of the touchpad gesture (default: `300`)
+---@field workspace_swipe_touch? boolean enable workspace swiping from the edge of a touchscreen (default: `false`)
+---@field workspace_swipe_invert? boolean invert the direction (touchpad only) (default: `true`)
+---@field workspace_swipe_touch_invert? boolean invert the direction (touchscreen only) (default: `false`)
+---@field workspace_swipe_min_speed_to_force? integer|boolean minimum speed in px per timepoint to force the change ignoring cancel_ratio. Setting to 0 will disable this mechanic. (default: `30`)
+---@field workspace_swipe_cancel_ratio? number|boolean how much the swipe has to proceed in order to commence it. (0.7 -> if > 0.7 * distance, switch, if less, revert) [0.0 - 1.0] (default: `0.5`)
+---@field workspace_swipe_create_new? boolean whether a swipe right on the last workspace should create a new one. (default: `true`)
+---@field workspace_swipe_direction_lock? boolean if enabled, switching direction will be locked when you swipe past the direction_lock_threshold (touchpad only). (default: `true`)
+---@field workspace_swipe_direction_lock_threshold? integer|boolean in px, the distance to swipe before direction lock activates (touchpad only). (default: `10`)
+---@field workspace_swipe_forever? boolean if enabled, swiping will not clamp at the neighboring workspaces but continue to the further ones. (default: `false`)
+---@field workspace_swipe_use_r? boolean if enabled, swiping will use the r prefix instead of the m prefix for finding workspaces. (default: `false`)
+---@field close_max_timeout? integer|boolean the timeout for a window to close when using a 1:1 gesture, in ms (default: `1000`)
+
+---@class (exact) HL.Config.Group.col
+---@field border_active? string|HL.Gradient active group border color (default: `0x66ffff00`)
+---@field border_inactive? string|HL.Gradient inactive (out of focus) group border color (default: `0x66777700`)
+---@field border_locked_active? string|HL.Gradient active locked group border color (default: `0x66ff5500`)
+---@field border_locked_inactive? string|HL.Gradient inactive locked group border color (default: `0x66775500`)
+
+---@class (exact) HL.Config.Group
+---@field auto_group? boolean whether new windows will be automatically grouped into the focused unlocked group. Note: if you want to disable auto_group only for specific windows, use the "group barred" window rule instead. (default: `true`)
+---@field insert_after_current? boolean whether new windows in a group spawn after current or at group tail (default: `true`)
+---@field focus_removed_window? boolean whether Hyprland should focus on the window that has just been moved out of the group (default: `true`)
+---@field drag_into_group? integer|boolean whether dragging a window into a unlocked group will merge them. Options: 0 (disabled), 1 (enabled), 2 (only when dragging into the groupbar) (default: `1`)
+---@field merge_groups_on_drag? boolean whether window groups can be dragged into other groups (default: `true`)
+---@field merge_groups_on_groupbar? boolean whether one group will be merged with another when dragged into its groupbar (default: `true`)
+---@field merge_floated_into_tiled_on_groupbar? boolean whether dragging a floating window into a tiled window groupbar will merge them (default: `false`)
+---@field group_on_movetoworkspace? boolean whether using movetoworkspace[silent] will merge the window into the workspace's solitary unlocked group (default: `false`)
+---@field col? HL.Config.Group.col
+---@field groupbar? HL.Config.Group.groupbar
+
+---@class (exact) HL.Config.Misc.col
+---@field splash? string Changes the color of the splash text (requires a monitor reload to take effect). (default: `0xffffffff`)
+
+---@class (exact) HL.Config.Misc
+---@field disable_hyprland_logo? boolean disables the random Hyprland logo / anime girl background. :( (default: `false`)
+---@field disable_splash_rendering? boolean disables the Hyprland splash rendering. (requires a monitor reload to take effect) (default: `false`)
+---@field disable_scale_notification? boolean disables notification popup when a monitor fails to set a suitable scale (default: `false`)
+---@field font_family? string Set the global default font to render the text including debug fps/notification, config error messages and etc., selected from system fonts. (default: `Sans`)
+---@field splash_font_family? string Changes the font used to render the splash text, selected from system fonts (requires a monitor reload to take effect).
+---@field force_default_wallpaper? integer|boolean Enforce any of the 3 default wallpapers. Setting this to 0 or 1 disables the anime background. -1 means "random". [-1/0/1/2] (default: `-1`)
+---@field vfr? boolean controls the VFR status of Hyprland. Heavily recommended to leave enabled to conserve resources. (default: `true`)
+---@field vrr? integer|boolean controls the VRR (Adaptive Sync) of your monitors. 0 - off, 1 - on, 2 - fullscreen only, 3 - fullscreen with video or game content type [0/1/2/3] (default: `0`)
+---@field mouse_move_enables_dpms? boolean If DPMS is set to off, wake up the monitors if the mouse moves. (default: `false`)
+---@field key_press_enables_dpms? boolean If DPMS is set to off, wake up the monitors if a key is pressed. (default: `false`)
+---@field name_vk_after_proc? boolean Name virtual keyboards after the processes that create them. E.g. /usr/bin/fcitx5 will have hl-virtual-keyboard-fcitx5. (default: `true`)
+---@field always_follow_on_dnd? boolean Will make mouse focus follow the mouse when drag and dropping. Recommended to leave it enabled, especially for people using focus follows mouse at 0. (default: `true`)
+---@field layers_hog_keyboard_focus? boolean If true, will make keyboard-interactive layers keep their focus on mouse move (e.g. wofi, bemenu) (default: `true`)
+---@field animate_manual_resizes? boolean If true, will animate manual window resizes/moves (default: `false`)
+---@field animate_mouse_windowdragging? boolean If true, will animate windows being dragged by mouse, note that this can cause weird behavior on some curves (default: `false`)
+---@field disable_autoreload? boolean If true, the config will not reload automatically on save, and instead needs to be reloaded with hyprctl reload. Might save on battery. (default: `false`)
+---@field enable_swallow? boolean Enable window swallowing (default: `false`)
+---@field swallow_regex? string The class regex to be used for windows that should be swallowed (usually, a terminal). To know more about the list of regex which can be used use this cheatsheet.
+---@field swallow_exception_regex? string The title regex to be used for windows that should not be swallowed by the windows specified in swallow_regex  (e.g. wev). The regex is matched against the parent (e.g. Kitty) window's title on the as…
+---@field focus_on_activate? boolean Whether Hyprland should focus an app that requests to be focused (an activate request) (default: `false`)
+---@field mouse_move_focuses_monitor? boolean Whether mouse moving into a different monitor should focus it (default: `true`)
+---@field allow_session_lock_restore? boolean if true, will allow you to restart a lockscreen app in case it crashes (default: `false`)
+---@field session_lock_xray? boolean if true, keep rendering workspaces below your lockscreen (default: `false`)
+---@field background_color? string change the background color. (requires enabled disable_hyprland_logo) (default: `0x111111`)
+---@field close_special_on_empty? boolean close the special workspace if the last window is removed (default: `true`)
+---@field on_focus_under_fullscreen? integer|boolean if there is a fullscreen or maximized window, decide whether a tiled window requested to focus should replace it, stay behind or disable the fullscreen/maximized state. 0 - ignore focus request (keep … (default: `2`)
+---@field exit_window_retains_fullscreen? boolean if true, closing a fullscreen window makes the next focused window fullscreen (default: `false`)
+---@field initial_workspace_tracking? integer|boolean if enabled, windows will open on the workspace they were invoked on. 0 - disabled, 1 - single-shot, 2 - persistent (all children too) (default: `1`)
+---@field middle_click_paste? boolean whether to enable middle-click-paste (aka primary selection) (default: `true`)
+---@field render_unfocused_fps? integer|boolean the maximum limit for render_unfocused windows' fps in the background (see also Window-Rules - render_unfocused) (default: `15`)
+---@field disable_xdg_env_checks? boolean disable the warning if XDG environment is externally managed (default: `false`)
+---@field disable_hyprland_qtutils_check? boolean disable the warning if hyprland-qtutils is not installed (default: `false`)
+---@field lockdead_screen_delay? integer|boolean delay after which the "lockdead" screen will appear in case a lockscreen app fails to cover all the outputs (5 seconds max) (default: `1000`)
+---@field enable_anr_dialog? boolean whether to enable the ANR (app not responding) dialog when your apps hang (default: `true`)
+---@field anr_missed_pings? integer|boolean number of missed pings before showing the ANR dialog (default: `5`)
+---@field size_limits_tiled? boolean whether to apply min_size and max_size rules to tiled windows (default: `false`)
+---@field disable_watchdog_warning? boolean whether to disable the warning about not using start-hyprland (default: `false`)
+---@field col? HL.Config.Misc.col
+
+---@class (exact) HL.Config.Layout
+---@field single_window_aspect_ratio? HL.Vec2Like whenever only a single window is shown on a screen, add padding so that it conforms to the specified aspect ratio. A value like 4 3 on a 16:9 screen will make it a 4:3 window in the middle with paddin… (default: `0 0`)
+---@field single_window_aspect_ratio_tolerance? integer|boolean sets a tolerance for single_window_aspect_ratio, so that if the padding that would have been added is smaller than the specified fraction of the height or width of the screen, it will not attempt to a… (default: `0.1`)
+
+---@class (exact) HL.Config.Binds
+---@field pass_mouse_when_bound? boolean if disabled, will not pass the mouse events to apps / dragging windows around if a keybind has been triggered. (default: `false`)
+---@field scroll_event_delay? integer|boolean in ms, how many ms to wait after a scroll event to allow passing another one for the binds. (default: `300`)
+---@field workspace_back_and_forth? boolean If enabled, an attempt to switch to the currently focused workspace will instead switch to the previous workspace. Akin to i3's auto_back_and_forth. (default: `false`)
+---@field hide_special_on_workspace_change? boolean If enabled, changing the active workspace (including to itself) will hide the special workspace on the monitor where the newly active workspace resides. (default: `false`)
+---@field allow_workspace_cycles? boolean If enabled, workspaces don't forget their previous workspace, so cycles can be created by switching to the first workspace in a sequence, then endlessly going to the previous workspace. (default: `false`)
+---@field workspace_center_on? integer|boolean Whether switching workspaces should center the cursor on the workspace (0) or on the last active window for that workspace (1) (default: `0`)
+---@field focus_preferred_method? integer|boolean sets the preferred focus finding method when using focuswindow/movewindow/etc with a direction. 0 - history (recent have priority), 1 - length (longer shared edges have priority) (default: `0`)
+---@field ignore_group_lock? boolean If enabled, dispatchers like moveintogroup, moveoutofgroup and movewindoworgroup will ignore lock per group. (default: `false`)
+---@field movefocus_cycles_fullscreen? boolean If enabled, when on a fullscreen window, movefocus will cycle fullscreen, if not, it will move the focus in a direction. (default: `false`)
+---@field movefocus_cycles_groupfirst? boolean If enabled, when in a grouped window, movefocus will cycle windows in the groups first, then at each ends of tabs, it'll move on to other windows/groups (default: `false`)
+---@field disable_keybind_grabbing? boolean If enabled, apps that request keybinds to be disabled (e.g. VMs) will not be able to do so. (default: `false`)
+---@field allow_pin_fullscreen? boolean If enabled, Allow fullscreen to pinned windows, and restore their pinned status afterwards (default: `false`)
+---@field drag_threshold? integer|boolean Movement threshold in pixels for window dragging and c/g bind flags. 0 to disable and grab on mousedown. (default: `0`)
+
+---@class (exact) HL.Config.XWayland
+---@field enabled? boolean allow running applications using X11 (default: `true`)
+---@field use_nearest_neighbor? boolean uses the nearest neighbor filtering for xwayland apps, making them pixelated rather than blurry (default: `true`)
+---@field force_zero_scaling? boolean forces a scale of 1 on xwayland windows on scaled displays. (default: `false`)
+---@field create_abstract_socket? boolean Create the abstract Unix domain socket for XWayland connections. (XWayland restart is required for changes to take effect; Linux only) (default: `false`)
+
+---@class (exact) HL.Config.OpenGL
+---@field nvidia_anti_flicker? boolean reduces flickering on nvidia at the cost of possible frame drops on lower-end GPUs. On non-nvidia, this is ignored. (default: `true`)
+
+---@class (exact) HL.Config.Render
+---@field direct_scanout? integer|boolean Enables direct scanout. Direct scanout attempts to reduce lag when there is only one fullscreen application on a screen (e.g. game). It is also recommended to set this to false if the fullscreen appli… (default: `0`)
+---@field expand_undersized_textures? boolean Whether to expand undersized textures along the edge, or rather stretch the entire texture. (default: `true`)
+---@field xp_mode? boolean Disables back buffer and bottom layer rendering. (default: `false`)
+---@field ctm_animation? integer|boolean Whether to enable a fade animation for CTM changes (hyprsunset). 2 means "auto" which disables them on Nvidia. (default: `2`)
+---@field cm_fs_passthrough? integer|boolean Passthrough color settings for fullscreen apps when possible. 0 - off, 1 - always, 2 - hdr only (default: `2`)
+---@field cm_enabled? boolean Whether the color management pipeline should be enabled or not (requires a restart of Hyprland to fully take effect) (default: `true`)
+---@field send_content_type? boolean Report content type to allow monitor profile autoswitch (may result in a black screen during the switch) (default: `true`)
+---@field cm_auto_hdr? integer|boolean Auto-switch to HDR in fullscreen when needed. 0 - off, 1 - switch to cm, hdr, 2 - switch to cm, hdredid (default: `1`)
+---@field new_render_scheduling? boolean Automatically uses triple buffering when needed, improves FPS on underpowered devices. (default: `false`)
+---@field non_shader_cm? integer|boolean Enable CM without shader. 0 - disable, 1 - whenever possible, 2 - DS and passthrough only, 3 - disable and ignore CM issues (default: `3`)
+---@field cm_sdr_eotf? string Default transfer function for displaying SDR apps. default - Use default value (Gamma 2.2), gamma22 - Treat unspecified as Gamma 2.2, gamma22force - Treat unspecified and sRGB as Gamma 2.2, srgb - Tre… (default: `default`)
+
+---@class (exact) HL.Config.Cursor
+---@field invisible? boolean don't render cursors (default: `false`)
+---@field sync_gsettings_theme? boolean sync xcursor theme with gsettings, it applies cursor-theme and cursor-size on theme load to gsettings making most CSD gtk based clients use same xcursor theme and size. (default: `true`)
+---@field no_hardware_cursors? integer|boolean disables hardware cursors. 0 - use hw cursors if possible, 1 - don't use hw cursors, 2 - auto (disable when tearing) (default: `2`)
+---@field no_break_fs_vrr? integer|boolean disables scheduling new frames on cursor movement for fullscreen apps with VRR enabled to avoid framerate spikes (may require no_hardware_cursors = true) 0 - off, 1 - on, 2 - auto (on with content typ… (default: `2`)
+---@field min_refresh_rate? integer|boolean minimum refresh rate for cursor movement when no_break_fs_vrr is active. Set to minimum supported refresh rate or higher (default: `24`)
+---@field hotspot_padding? integer|boolean the padding, in logical px, between screen edges and the cursor (default: `1`)
+---@field inactive_timeout? number|boolean in seconds, after how many seconds of cursor's inactivity to hide it. Set to 0 for never. (default: `0`)
+---@field no_warps? boolean if true, will not warp the cursor in many cases (focusing, keybinds, etc) (default: `false`)
+---@field persistent_warps? boolean When a window is refocused, the cursor returns to its last position relative to that window, rather than to the centre. (default: `false`)
+---@field warp_on_change_workspace? integer|boolean Move the cursor to the last focused window after changing the workspace. Options: 0 (Disabled), 1 (Enabled), 2 (Force - ignores cursor:no_warps option) (default: `0`)
+---@field warp_on_toggle_special? integer|boolean Move the cursor to the last focused window when toggling a special workspace. Options: 0 (Disabled), 1 (Enabled), 2 (Force - ignores cursor:no_warps option) (default: `0`)
+---@field default_monitor? string the name of a default monitor for the cursor to be set to on startup (see hyprctl monitors for names) (default: `[[EMPTY]]`)
+---@field zoom_factor? number|boolean the factor to zoom by around the cursor. Like a magnifying glass. Minimum 1.0 (meaning no zoom) (default: `1.0`)
+---@field zoom_rigid? boolean whether the zoom should follow the cursor rigidly (cursor is always centered if it can be) or loosely (default: `false`)
+---@field zoom_detached_camera? boolean detach the camera from the mouse when zoomed in, only ever moving the camera to keep the mouse in view when it goes past the screen edges (default: `true`)
+---@field enable_hyprcursor? boolean whether to enable hyprcursor support (default: `true`)
+---@field hide_on_key_press? boolean Hides the cursor when you press any key until the mouse is moved. (default: `false`)
+---@field hide_on_touch? boolean Hides the cursor when the last input was a touch input until a mouse input is done. (default: `true`)
+---@field hide_on_tablet? boolean Hides the cursor when the last input was a tablet input until a mouse input is done. (default: `true`)
+---@field use_cpu_buffer? integer|boolean Makes HW cursors use a CPU buffer. Required on Nvidia to have HW cursors. 0 - off, 1 - on, 2 - auto (nvidia only) (default: `2`)
+---@field warp_back_after_non_mouse_input? boolean Warp the cursor back to where it was after using a non-mouse input to move it, and then returning back to mouse. (default: `false`)
+---@field zoom_disable_aa? boolean disable antialiasing when zooming, which means things will be pixelated instead of blurry (default: `false`)
+
+---@class (exact) HL.Config.Ecosystem
+---@field no_update_news? boolean disable the popup that shows up when you update hyprland to a new version. (default: `false`)
+---@field no_donation_nag? boolean disable the popup that shows up twice a year encouraging to donate. (default: `false`)
+---@field enforce_permissions? boolean whether to enable permission control. (default: `false`)
+
+---@class (exact) HL.Config.Quirks
+---@field prefer_hdr? integer|boolean Report HDR mode as preferred. 0 - off, 1 - always, 2 - gamescope only (default: `0`)
+
+---@class (exact) HL.Config.Debug
+---@field overlay? boolean print the debug performance overlay. Disable VFR for accurate results. (default: `false`)
+---@field damage_blink? boolean (epilepsy warning!) flash areas updated with damage tracking (default: `false`)
+---@field gl_debugging? boolean enables OpenGL debugging with glGetError and EGL_KHR_debug, requires a restart after changing. (default: `false`)
+---@field disable_logs? boolean disable logging to a file (default: `true`)
+---@field disable_time? boolean disables time logging (default: `true`)
+---@field damage_tracking? integer|boolean redraw only the needed bits of the display. Do not change. (default: full - 2) monitor - 1, none - 0 (default: `2`)
+---@field enable_stdout_logs? boolean enables logging to stdout (default: `false`)
+---@field manual_crash? integer|boolean set to 1 and then back to 0 to crash Hyprland. (default: `0`)
+---@field suppress_errors? boolean if true, do not display config file parsing errors. (default: `false`)
+---@field watchdog_timeout? integer|boolean sets the timeout in seconds for watchdog to abort processing of a signal of the main thread. Set to 0 to disable. (default: `5`)
+---@field disable_scale_checks? boolean disables verification of the scale factors. Will result in pixel alignment and rounding errors. (default: `false`)
+---@field error_limit? integer|boolean limits the number of displayed config file parsing errors. (default: `5`)
+---@field error_position? integer|boolean sets the position of the error bar. top - 0, bottom - 1 (default: `0`)
+---@field colored_stdout_logs? boolean enables colors in the stdout logs. (default: `true`)
+---@field pass? boolean enables render pass debugging. (default: `false`)
+---@field full_cm_proto? boolean claims support for all cm proto features (requires restart) (default: `false`)
+
+---@class (exact) HL.Config.Master
+---@field allow_small_split? boolean enable adding additional master windows in a horizontal split style (default: `false`)
+---@field special_scale_factor? number|boolean the scale of the special workspace windows. [0.0 - 1.0] (default: `1`)
+---@field mfact? number|boolean the size as a percentage of the master window, for example mfact = 0.70 would mean 70% of the screen will be the master window, and 30% the slave [0.0 - 1.0] (default: `0.55`)
+---@field new_status? string master: new window becomes master; slave: new windows are added to slave stack; inherit: inherit from focused window (default: `slave`)
+---@field new_on_top? boolean whether a newly open window should be on the top of the stack (default: `false`)
+---@field new_on_active? string before, after: place new window relative to the focused window; none: place new window according to the value of new_on_top. (default: `none`)
+---@field orientation? string default placement of the master area, can be left, right, top, bottom or center (default: `left`)
+---@field slave_count_for_center_master? integer|boolean when using orientation=center, make the master window centered only when at least this many slave windows are open. (Set 0 to always_center_master) (default: `2`)
+---@field center_master_fallback? string Set fallback for center master when slaves are less than slave_count_for_center_master, can be left ,right ,top ,bottom (default: `left`)
+---@field smart_resizing? boolean if enabled, resizing direction will be determined by the mouse's position on the window (nearest to which corner). Else, it is based on the window's tiling position. (default: `true`)
+---@field drop_at_cursor? boolean when enabled, dragging and dropping windows will put them at the cursor position. Otherwise, when dropped at the stack side, they will go to the top/bottom of the stack depending on new_on_top. (default: `true`)
+---@field always_keep_position? boolean whether to keep the master window in its configured position when there are no slave windows (default: `false`)
+
+---@class (exact) HL.Config.Dwindle
+---@field pseudotile? boolean enable pseudotiling. Pseudotiled windows retain their floating size when tiled. (default: `false`)
+---@field force_split? integer|boolean 0 -> split follows mouse, 1 -> always split to the left (new = left or top) 2 -> always split to the right (new = right or bottom) (default: `0`)
+---@field preserve_split? boolean if enabled, the split (side/top) will not change regardless of what happens to the container. (default: `false`)
+---@field smart_split? boolean if enabled, allows a more precise control over the window split direction based on the cursor's position. The window is conceptually divided into four triangles, and cursor's triangle determines the s… (default: `false`)
+---@field smart_resizing? boolean if enabled, resizing direction will be determined by the mouse's position on the window (nearest to which corner). Else, it is based on the window's tiling position. (default: `true`)
+---@field permanent_direction_override? boolean if enabled, makes the preselect direction persist until either this mode is turned off, another direction is specified, or a non-direction is specified (anything other than l,r,u/t,d/b) (default: `false`)
+---@field special_scale_factor? number|boolean specifies the scale factor of windows on the special workspace [0 - 1] (default: `1`)
+---@field split_width_multiplier? number|boolean specifies the auto-split width multiplier. Multiplying window size is useful on widescreen monitors where window W > H even after several splits. (default: `1.0`)
+---@field use_active_for_splits? boolean whether to prefer the active window or the mouse position for splits (default: `true`)
+---@field default_split_ratio? number|boolean the default split ratio on window open. 1 means even 50/50 split. [0.1 - 1.9] (default: `1.0`)
+---@field split_bias? integer|boolean specifies which window will receive the split ratio. 0 -> directional (the top or left window), 1 -> the current window (default: `0`)
+---@field precise_mouse_move? boolean bindm movewindow will drop the window more precisely depending on where your mouse is. (default: `false`)
+
+---@class HL.Config
+---@field general? HL.Config.General
+---@field decoration? HL.Config.Decoration
+---@field animations? HL.Config.Animations
+---@field input? HL.Config.Input
+---@field gestures? HL.Config.Gestures
+---@field group? HL.Config.Group
+---@field misc? HL.Config.Misc
+---@field layout? HL.Config.Layout
+---@field binds? HL.Config.Binds
+---@field xwayland? HL.Config.XWayland
+---@field opengl? HL.Config.OpenGL
+---@field render? HL.Config.Render
+---@field cursor? HL.Config.Cursor
+---@field ecosystem? HL.Config.Ecosystem
+---@field quirks? HL.Config.Quirks
+---@field debug? HL.Config.Debug
+---@field master? HL.Config.Master
+---@field dwindle? HL.Config.Dwindle
+
+---@diagnostic disable: duplicate-set-field
+---Apply (or merge) Hyprland configuration values.
+---@overload fun(config: HL.Config): nil
+function hl.config(config) end
