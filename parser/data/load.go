@@ -147,18 +147,20 @@ func markdownToHTML(source []byte) soup.Root {
 func parseDocumentationMarkdown(source []byte, headingRootLevel int) (sections []SectionDefinition) {
 	document := markdownToHTML(source)
 	for _, table := range document.FindAll("table") {
-		if !arraysEqual(tableHeaderCells(table), []string{"name", "description", "type", "default"}) {
+		headers := tableHeaderCells(table)
+		if !hasOptionTableHeaders(headers) {
 			continue
 		}
 
-		// fmt.Printf("Processing table %s\n", table.HTML())
+		path, hasCategoryPath := optionTablePath(table, headingRootLevel)
 		section := SectionDefinition{
-			Path: tablePath(table, headingRootLevel),
+			Path:            path,
+			HasCategoryPath: hasCategoryPath,
 		}
 		section.Variables = make([]VariableDefinition, 0)
 		for _, row := range table.FindAll("tr")[1:] {
 			cells := row.FindAll("td")
-			if len(cells) != 4 {
+			if len(cells) < 4 {
 				continue
 			}
 
@@ -177,6 +179,43 @@ func parseDocumentationMarkdown(source []byte, headingRootLevel int) (sections [
 		}
 	}
 	return sections
+}
+
+func hasOptionTableHeaders(headers []string) bool {
+	if len(headers) != 4 && len(headers) != 5 {
+		return false
+	}
+	expected := []string{"name", "description", "type", "default", "limits"}
+	for i, header := range headers {
+		if strings.ToLower(strings.TrimSpace(header)) != expected[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func optionTablePath(table soup.Root, headingRootLevel int) ([]string, bool) {
+	previous := table.FindPrevElementSibling()
+	previousText := strings.TrimSpace(previous.FullText())
+	category := ""
+	if categoryStart := strings.LastIndex(previousText, "Category:"); categoryStart >= 0 {
+		category = strings.TrimSpace(previousText[categoryStart+len("Category:"):])
+	}
+	category = strings.Trim(category, "`")
+	if category == "" {
+		return tablePath(table, headingRootLevel), false
+	}
+
+	parts := strings.Split(category, ".")
+	for i, part := range parts {
+		part = strings.ReplaceAll(part, "-", "_")
+		part = strings.ReplaceAll(part, " ", "_")
+		if i == 0 {
+			part = strings.ToUpper(part[:1]) + part[1:]
+		}
+		parts[i] = part
+	}
+	return parts, true
 }
 
 func (s SectionDefinition) AttachSubsections(sections []SectionDefinition) SectionDefinition {

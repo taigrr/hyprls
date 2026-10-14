@@ -15,9 +15,10 @@ func FindSectionDefinitionByName(name string) *SectionDefinition {
 }
 
 type SectionDefinition struct {
-	Path        []string
-	Subsections []SectionDefinition
-	Variables   []VariableDefinition
+	Path            []string
+	Subsections     []SectionDefinition
+	Variables       []VariableDefinition
+	HasCategoryPath bool
 }
 
 func (s SectionDefinition) Name() string {
