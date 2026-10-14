@@ -58,15 +58,56 @@ func className(path []string) string {
 	return "HL.Config." + strings.Join(path, ".")
 }
 
-// flattenSubsections returns all (sub)sections found anywhere under the root.
-// The Hyprland wiki parser sometimes chains H4 siblings as nested paths; for
-// our purposes we treat every section with len(Path) >= 2 as a direct child of
-// its root section, keyed by the last path element.
+type configCategory struct {
+	variables []pd.VariableDefinition
+	children  map[string]*configCategory
+}
+
 func flattenSubsections(sec pd.SectionDefinition, out *[]pd.SectionDefinition) {
-	for _, s := range sec.Subsections {
-		*out = append(*out, s)
-		flattenSubsections(s, out)
+	for _, subsection := range sec.Subsections {
+		*out = append(*out, subsection)
+		flattenSubsections(subsection, out)
 	}
+}
+
+func categoryTree(root pd.SectionDefinition) *configCategory {
+	tree := &configCategory{variables: root.Variables, children: map[string]*configCategory{}}
+	for _, section := range root.Subsections {
+		node := tree
+		path := section.Path[1:]
+		if !section.HasCategoryPath {
+			path = []string{strings.ToLower(section.Path[len(section.Path)-1])}
+		}
+		for _, name := range path {
+			name = strings.ReplaceAll(name, "-", "_")
+			name = strings.ReplaceAll(name, " ", "_")
+			if node.children[name] == nil {
+				node.children[name] = &configCategory{children: map[string]*configCategory{}}
+			}
+			node = node.children[name]
+		}
+		node.variables = append(node.variables, section.Variables...)
+	}
+	return tree
+}
+
+func emitCategoryClasses(b *strings.Builder, root string, node *configCategory, path []string) map[string]string {
+	children := map[string]string{}
+	names := make([]string, 0, len(node.children))
+	for name := range node.children {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	for _, name := range names {
+		childPath := append(append([]string(nil), path...), name)
+		child := node.children[name]
+		children[name] = className(append([]string{root}, childPath...))
+		emitCategoryClasses(b, root, child, childPath)
+	}
+	if len(path) > 0 {
+		emitClass(b, className(append([]string{root}, path...)), node.variables, children)
+	}
+	return children
 }
 
 // emitClass writes a ---@class block for a section. Variable names containing
@@ -145,17 +186,29 @@ func main() {
 
 `)
 
-	// Per-section classes (root + flattened subsections).
+	// Per-section classes, preserving nested category paths from the wiki.
 	rootChildren := map[string]map[string]string{}
 	for _, root := range roots {
+		usesWikiCategories := false
+		for _, subsection := range root.Subsections {
+			if subsection.HasCategoryPath {
+				usesWikiCategories = true
+				break
+			}
+		}
 		rootChildren[root.Name()] = map[string]string{}
-		subs := []pd.SectionDefinition{}
-		flattenSubsections(root, &subs)
-		for _, sub := range subs {
-			leaf := strings.ToLower(sub.Path[len(sub.Path)-1])
-			cls := className([]string{root.Name(), leaf})
-			emitClass(&b, cls, sub.Variables, nil)
-			rootChildren[root.Name()][leaf] = cls
+		if usesWikiCategories {
+			rootChildren[root.Name()] = emitCategoryClasses(&b, root.Name(), categoryTree(root), nil)
+			continue
+		}
+
+		subsections := []pd.SectionDefinition{}
+		flattenSubsections(root, &subsections)
+		for _, subsection := range subsections {
+			leaf := strings.ToLower(subsection.Path[len(subsection.Path)-1])
+			class := className([]string{root.Name(), leaf})
+			emitClass(&b, class, subsection.Variables, nil)
+			rootChildren[root.Name()][leaf] = class
 		}
 	}
 

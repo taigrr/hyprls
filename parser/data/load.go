@@ -152,8 +152,10 @@ func parseDocumentationMarkdown(source []byte, headingRootLevel int) (sections [
 			continue
 		}
 
+		path, hasCategoryPath := optionTablePath(table, headingRootLevel)
 		section := SectionDefinition{
-			Path: optionTablePath(table, headingRootLevel),
+			Path:            path,
+			HasCategoryPath: hasCategoryPath,
 		}
 		section.Variables = make([]VariableDefinition, 0)
 		for _, row := range table.FindAll("tr")[1:] {
@@ -192,17 +194,28 @@ func hasOptionTableHeaders(headers []string) bool {
 	return true
 }
 
-func optionTablePath(table soup.Root, headingRootLevel int) []string {
+func optionTablePath(table soup.Root, headingRootLevel int) ([]string, bool) {
 	previous := table.FindPrevElementSibling()
-	category := strings.TrimSpace(strings.TrimPrefix(strings.TrimSpace(previous.FullText()), "Category:"))
+	previousText := strings.TrimSpace(previous.FullText())
+	category := ""
+	if categoryStart := strings.LastIndex(previousText, "Category:"); categoryStart >= 0 {
+		category = strings.TrimSpace(previousText[categoryStart+len("Category:"):])
+	}
 	category = strings.Trim(category, "`")
-	if category == strings.TrimSpace(previous.FullText()) || category == "" {
-		return tablePath(table, headingRootLevel)
+	if category == "" {
+		return tablePath(table, headingRootLevel), false
 	}
 
 	parts := strings.Split(category, ".")
-	parts[0] = strings.ToUpper(parts[0][:1]) + parts[0][1:]
-	return parts
+	for i, part := range parts {
+		part = strings.ReplaceAll(part, "-", "_")
+		part = strings.ReplaceAll(part, " ", "_")
+		if i == 0 {
+			part = strings.ToUpper(part[:1]) + part[1:]
+		}
+		parts[i] = part
+	}
+	return parts, true
 }
 
 func (s SectionDefinition) AttachSubsections(sections []SectionDefinition) SectionDefinition {
