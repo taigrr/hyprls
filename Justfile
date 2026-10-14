@@ -6,8 +6,7 @@ pull-wiki:
 	#!/usr/bin/env bash
 	set -euxo pipefail
 	git submodule update --init --recursive --remote
-	cp hyprland-wiki/pages/Configuring/*.md parser/data/sources/ 2>/dev/null \
-		|| cp hyprland-wiki/content/Configuring/*.md parser/data/sources/
+	cp hyprland-wiki/content/configuring/core/config-options.md parser/data/sources/Variables.md
 
 # Regenerate library/hl.config.meta.lua (the typed schema for hl.config).
 gen:

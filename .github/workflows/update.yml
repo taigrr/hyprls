@@ -33,11 +33,7 @@ jobs:
       - name: Copy wiki sources
         run: |
           set -euo pipefail
-          if compgen -G "hyprland-wiki/pages/Configuring/*.md" >/dev/null; then
-            cp hyprland-wiki/pages/Configuring/*.md parser/data/sources/
-          else
-            cp hyprland-wiki/content/Configuring/*.md parser/data/sources/
-          fi
+          cp hyprland-wiki/content/configuring/core/config-options.md parser/data/sources/Variables.md
 
       - name: Regenerate library/hl.config.meta.lua
         run: |
