@@ -83,6 +83,7 @@
 ---@field passes? integer|boolean The amount of passes to perform (default: `1`)
 ---@field popups? boolean Whether to blur popups, e.g. right-click menus (default: `false`)
 ---@field popups_ignorealpha? number|boolean Works like ignore_alpha in layer rules. If pixel opacity is below the set value, will not blur (default: `0.2`)
+---@field proportional? boolean If enabled, blur strength will be proportional to pixel opacity. Requires render:use_shader_blur_blend (default: `false`)
 ---@field size? integer|boolean Blur size (distance) (default: `8`)
 ---@field special? boolean Whether to blur behind the special workspace (note: expensive) (default: `false`)
 ---@field variant? string Blur pattern variant. May significantly increase GPU and CPU usage (default: `kawase`)
@@ -300,6 +301,7 @@
 ---@field scroll_factor? number|boolean Multiplier added to scroll movement for external mice. Note that there is a separate setting for touchpad scroll_factor (default: `1.0`)
 ---@field sensitivity? number|boolean Sets the mouse input sensitivity. Additional info: libinput#pointer-acceleration (default: `0.0`)
 ---@field special_fallthrough? boolean if enabled, having only floating windows in the special workspace will not block focusing windows in the regular workspace (default: `false`)
+---@field swallow_focus_click? boolean If enabled, the first click on unfocused window will focus it without forwarding the click action. Only relevant when mouse focus is detached, e.g. input.follow_mouse is 0 or 2 (default: `false`)
 ---@field tablet? HL.Config.Input.tablet
 ---@field tablettool? HL.Config.Input.tablettool
 ---@field touchdevice? HL.Config.Input.touchdevice
@@ -360,7 +362,6 @@
 ---@field initial_workspace_token_timeout? integer|boolean the time in seconds a window has to open on its invoked workspace before the tracking token expires. (default: `10`)
 ---@field initial_workspace_tracking? integer|boolean If enabled, windows will open on the workspace they were invoked on. 0 - disabled, 1 - single-shot, 2 - persistent (all children too) (default: `1`)
 ---@field key_press_enables_dpms? boolean If DPMS is set to off, wake up the monitors if a key is pressed (default: `false`)
----@field layers_hog_keyboard_focus? boolean If true, will make keyboard-interactive layers keep their focus on mouse move, e.g. wofi, bemenu (default: `true`)
 ---@field lockdead_screen_delay? integer|boolean Delay in ms after which the "lockdead" screen will appear in case a locks creen app fails to cover all the outputs (default: `1000`)
 ---@field middle_click_paste? boolean Whether to enable middle-click-paste (aka primary selection) (default: `true`)
 ---@field mouse_move_enables_dpms? boolean If DPMS is set to off, wake up the monitors if the mouse moves (default: `false`)
@@ -378,12 +379,17 @@
 ---@field vrr? integer|boolean Controls the VRR (Adaptive Sync) of your monitors. 0 - off, 1 - on, 2 - fullscreen only, 3 - fullscreen with video or game content type (default: `0`)
 ---@field col? HL.Config.Misc.col
 
+---@class (exact) HL.Config.Layers
+---@field allow_new_top_layers_over_existing_fullscreen? boolean If false, newly mapped layers are not allowed to render over existing covering fullscreen window. Note that fullscreen hides all pre-existing top layers regardless of this setting (default: `true`)
+---@field layers_hog_keyboard_focus? boolean If true, will make keyboard-interactive layers keep their focus on mouse move, e.g. wofi, bemenu (default: `true`)
+
 ---@class (exact) HL.Config.Layout
 ---@field single_window_aspect_ratio? HL.Vec2Like Whenever only a single window is shown on a screen, add padding so that it conforms to the specified aspect ratio. A value like 4 3 on a 16:9 screen will make it a 4:3 window in the middle with paddin… (default: `{0, 0}`)
 ---@field single_window_aspect_ratio_tolerance? number|boolean Sets a tolerance for single_window_aspect_ratio, so that if the padding that would have been added is smaller than the specified fraction of the height or width of the screen, it will not attempt to a… (default: `0.1`)
 
 ---@class (exact) HL.Config.Binds
 ---@field allow_pin_fullscreen? boolean If enabled, allow fullscreen to pinned windows, and restore their pinned status afterwards (default: `false`)
+---@field client_requested_fs_uses_layout_handler? boolean If false, client requested FS will use default FS handler (default: `true`)
 ---@field allow_workspace_cycles? boolean If enabled, workspaces don't forget their previous workspace, so cycles can be created by switching to the first workspace in a sequence, then endlessly going to the previous workspace (default: `false`)
 ---@field disable_keybind_grabbing? boolean If enabled, apps that request keybinds to be disabled, e.g. VMs, will not be able to do so (default: `false`)
 ---@field drag_threshold? integer|boolean Movement threshold in pixels for window dragging and click/drag bind flags. 0 means disabled (default: `0`)
@@ -530,6 +536,7 @@
 ---@field gestures? HL.Config.Gestures
 ---@field group? HL.Config.Group
 ---@field misc? HL.Config.Misc
+---@field layers? HL.Config.Layers
 ---@field layout? HL.Config.Layout
 ---@field binds? HL.Config.Binds
 ---@field xwayland? HL.Config.Xwayland
