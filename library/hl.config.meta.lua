@@ -83,6 +83,7 @@
 ---@field passes? integer|boolean The amount of passes to perform (default: `1`)
 ---@field popups? boolean Whether to blur popups, e.g. right-click menus (default: `false`)
 ---@field popups_ignorealpha? number|boolean Works like ignore_alpha in layer rules. If pixel opacity is below the set value, will not blur (default: `0.2`)
+---@field proportional? boolean If enabled, blur strength will be proportional to pixel opacity. Requires render:use_shader_blur_blend (default: `false`)
 ---@field size? integer|boolean Blur size (distance) (default: `8`)
 ---@field special? boolean Whether to blur behind the special workspace (note: expensive) (default: `false`)
 ---@field variant? string Blur pattern variant. May significantly increase GPU and CPU usage (default: `kawase`)
@@ -101,8 +102,8 @@
 
 ---@class (exact) HL.Config.Decoration.glow
 ---@field enabled? boolean Enable inner glow on windows (default: `false`)
----@field color? string Active window glow's color. Alpha dictates opacity (default: `0xee1a1a1a`)
----@field color_inactive? string Inactive window glow's color. If not set, will fall back to color
+---@field color? string|HL.Gradient Active window glow's color. Alpha dictates opacity (default: `0xee1a1a1a`)
+---@field color_inactive? string|HL.Gradient Inactive window glow's color. If not set, will fall back to color
 ---@field range? integer|boolean Glow range (size) in pixels (default: `10`)
 ---@field render_power? integer|boolean In what power to render the falloff. More power, the faster the falloff (default: `3`)
 
@@ -176,10 +177,10 @@
 ---@field move_snap_cursor? boolean When releasing the scroll move gesture, whether it should snap the cursor to the newly focused window (default: `true`)
 
 ---@class (exact) HL.Config.Group.col
----@field border_active? string|HL.Gradient Active group border color (default: `0x66ffff00`)
----@field border_inactive? string|HL.Gradient Inactive group border color (default: `0x66777700`)
----@field border_locked_active? string|HL.Gradient Active locked group border color (default: `0x66ff5500`)
----@field border_locked_inactive? string|HL.Gradient Inactive locked group border color (default: `0x66775500`)
+---@field border_active? string|HL.Gradient Active group border color. Has additional whole_monitor? = bool parameter in the gradient (default: `0x66ffff00`)
+---@field border_inactive? string|HL.Gradient Inactive group border color. Has additional whole_monitor? = bool parameter in the gradient (default: `0x66777700`)
+---@field border_locked_active? string|HL.Gradient Active locked group border color. Has additional whole_monitor? = bool parameter in the gradient (default: `0x66ff5500`)
+---@field border_locked_inactive? string|HL.Gradient Inactive locked group border color. Has additional whole_monitor? = bool parameter in the gradient (default: `0x66775500`)
 
 ---@class (exact) HL.Config.Group.groupbar.col
 ---@field active? string|HL.Gradient Active group bar background color (default: `0x66ffff00`)
@@ -231,7 +232,7 @@
 ---@field allow_tearing? boolean Master switch for allowing tearing to occur. See the Tearing page (default: `false`)
 ---@field border_size? integer|boolean Size of the border around windows (default: `1`)
 ---@field extend_border_grab_area? integer|boolean Extends the area around the border where you can click and drag on, only used when general.resize_on_border is on (default: `15`)
----@field float_gaps? any Gaps between windows and monitor edges for floating windows -1 means default (default: `0`)
+---@field float_gaps? any Gaps between windows and monitor edges for floating windows -1 means default. (default: `0`)
 ---@field gaps_in? any Gaps between windows (default: `5`)
 ---@field gaps_out? any Gaps between windows and monitor edges (default: `20`)
 ---@field gaps_workspaces? integer|boolean Gaps between workspaces. Stacks with gaps_out (default: `0`)
@@ -256,7 +257,7 @@
 ---@field dim_strength? number|boolean How much inactive windows should be dimmed (default: `0.5`)
 ---@field fullscreen_opacity? number|boolean Opacity of fullscreen windows (default: `1.0`)
 ---@field inactive_opacity? number|boolean Opacity of inactive windows (default: `1.0`)
----@field rounding? integer|boolean Rounded corners' radius (in layout px) (default: `0`)
+---@field rounding? any Rounded corners' radius (in layout px) (default: `0`)
 ---@field rounding_power? number|boolean Adjusts the curve used for rounding corners, larger is smoother, 1.0 is a triangular corner, 2.0 is a circle, 4.0 is a squircle (default: `2.0`)
 ---@field screen_shader? string A path to a custom shader to be applied at the end of rendering. See examples/screenShader.frag for an example
 ---@field blur? HL.Config.Decoration.blur
@@ -299,7 +300,8 @@
 ---@field scroll_method? string Sets the scroll method. Additional info: libinput#scrolling. Options: "2fg"/"edge"/"on_button_down"/"no_scroll" (2fg - 2 fingers)
 ---@field scroll_factor? number|boolean Multiplier added to scroll movement for external mice. Note that there is a separate setting for touchpad scroll_factor (default: `1.0`)
 ---@field sensitivity? number|boolean Sets the mouse input sensitivity. Additional info: libinput#pointer-acceleration (default: `0.0`)
----@field special_fallthrough? boolean if enabled, having only floating windows in the special workspace will not block focusing windows in the regular workspace (default: `false`)
+---@field special_fallthrough? boolean If enabled, having only floating windows in the special workspace will not block focusing windows in the regular workspace (default: `false`)
+---@field swallow_focus_click? boolean If enabled, the first click on unfocused window will focus it without forwarding the click action. Only relevant when mouse focus is detached, e.g. input.follow_mouse is 0 or 2 (default: `false`)
 ---@field tablet? HL.Config.Input.tablet
 ---@field tablettool? HL.Config.Input.tablettool
 ---@field touchdevice? HL.Config.Input.touchdevice
@@ -360,8 +362,7 @@
 ---@field initial_workspace_token_timeout? integer|boolean the time in seconds a window has to open on its invoked workspace before the tracking token expires. (default: `10`)
 ---@field initial_workspace_tracking? integer|boolean If enabled, windows will open on the workspace they were invoked on. 0 - disabled, 1 - single-shot, 2 - persistent (all children too) (default: `1`)
 ---@field key_press_enables_dpms? boolean If DPMS is set to off, wake up the monitors if a key is pressed (default: `false`)
----@field layers_hog_keyboard_focus? boolean If true, will make keyboard-interactive layers keep their focus on mouse move, e.g. wofi, bemenu (default: `true`)
----@field lockdead_screen_delay? integer|boolean Delay in ms after which the "lockdead" screen will appear in case a locks creen app fails to cover all the outputs (default: `1000`)
+---@field lockdead_screen_delay? integer|boolean Delay in ms after which the "lockdead" screen will appear in case a lock screen app fails to cover all the outputs (default: `1000`)
 ---@field middle_click_paste? boolean Whether to enable middle-click-paste (aka primary selection) (default: `true`)
 ---@field mouse_move_enables_dpms? boolean If DPMS is set to off, wake up the monitors if the mouse moves (default: `false`)
 ---@field mouse_move_focuses_monitor? boolean Whether mouse moving into a different monitor should focus it (default: `true`)
@@ -378,15 +379,21 @@
 ---@field vrr? integer|boolean Controls the VRR (Adaptive Sync) of your monitors. 0 - off, 1 - on, 2 - fullscreen only, 3 - fullscreen with video or game content type (default: `0`)
 ---@field col? HL.Config.Misc.col
 
+---@class (exact) HL.Config.Layers
+---@field allow_new_top_layers_over_existing_fullscreen? boolean If false, newly mapped layers are not allowed to render over existing covering fullscreen window. Note that fullscreen hides all pre-existing top layers regardless of this setting (default: `true`)
+---@field layers_hog_keyboard_focus? boolean If true, will make keyboard-interactive layers keep their focus on mouse move, e.g. wofi, bemenu (default: `true`)
+
 ---@class (exact) HL.Config.Layout
 ---@field single_window_aspect_ratio? HL.Vec2Like Whenever only a single window is shown on a screen, add padding so that it conforms to the specified aspect ratio. A value like 4 3 on a 16:9 screen will make it a 4:3 window in the middle with paddin… (default: `{0, 0}`)
 ---@field single_window_aspect_ratio_tolerance? number|boolean Sets a tolerance for single_window_aspect_ratio, so that if the padding that would have been added is smaller than the specified fraction of the height or width of the screen, it will not attempt to a… (default: `0.1`)
 
 ---@class (exact) HL.Config.Binds
 ---@field allow_pin_fullscreen? boolean If enabled, allow fullscreen to pinned windows, and restore their pinned status afterwards (default: `false`)
+---@field client_requested_fs_uses_layout_handler? boolean If false, client requested FS will use default FS handler (default: `true`)
 ---@field allow_workspace_cycles? boolean If enabled, workspaces don't forget their previous workspace, so cycles can be created by switching to the first workspace in a sequence, then endlessly going to the previous workspace (default: `false`)
 ---@field disable_keybind_grabbing? boolean If enabled, apps that request keybinds to be disabled, e.g. VMs, will not be able to do so (default: `false`)
 ---@field drag_threshold? integer|boolean Movement threshold in pixels for window dragging and click/drag bind flags. 0 means disabled (default: `0`)
+---@field drag_center_window? boolean Whether to center the window on the pointer, or use the initial hotspot (default: `true`)
 ---@field focus_preferred_method? integer|boolean Sets the preferred focus finding method when using hl.dsp.focus({ direction })/hl.dsp.window.move({ direction })/etc. 0 - most recent active window has priority, 1 - longer shared edges have priority) (default: `0`)
 ---@field hide_special_on_workspace_change? boolean If enabled, changing the active workspace (including to itself) will hide the special workspace on the monitor where the newly active workspace resides (default: `false`)
 ---@field ignore_group_lock? boolean If enabled, dispatchers like hl.dsp.window.move({ into_group }) and hl.dsp.window.move({ out_of_group }) will ignore lock per group (default: `false`)
@@ -463,8 +470,8 @@
 ---@field skip_non_kms_dmabuf_formats? boolean do not report dmabuf formats which cannot be imported into KMS (default: `false`)
 
 ---@class (exact) HL.Config.Input_capture
----@field capture_modifiers? boolean if enabled, modifiers are also captured and sent to the program (default: `false`)
----@field enforce_barriers? boolean if enabled, throw a Wayland error when an invalid barrier is received (default: `true`)
+---@field capture_modifiers? boolean If enabled, modifiers are also captured and sent to the program (default: `false`)
+---@field enforce_barriers? boolean If enabled, throw a Wayland error when an invalid barrier is received (default: `true`)
 
 ---@class (exact) HL.Config.Debug
 ---@field colored_stdout_logs? boolean Enables colors in the stdout logs (default: `true`)
@@ -530,6 +537,7 @@
 ---@field gestures? HL.Config.Gestures
 ---@field group? HL.Config.Group
 ---@field misc? HL.Config.Misc
+---@field layers? HL.Config.Layers
 ---@field layout? HL.Config.Layout
 ---@field binds? HL.Config.Binds
 ---@field xwayland? HL.Config.Xwayland

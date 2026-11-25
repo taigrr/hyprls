@@ -69,7 +69,7 @@ Category: `general`
 | allow_tearing | Master switch for allowing tearing to occur. See the [Tearing page](../../extra/tearing) | bool | `false` | |
 | border_size | Size of the border around windows | int | `1` | [0 - 20] |
 | extend_border_grab_area | Extends the area around the border where you can click and drag on, only used when `general.resize_on_border` is on | int | `15` | [0 - 100] |
-| float_gaps | Gaps between windows and monitor edges for floating windows `-1` means default | css_gaps | `0` | |
+| float_gaps | Gaps between windows and monitor edges for floating windows `-1` means default. | css_gaps | `0` | |
 | gaps_in | Gaps between windows | css_gaps | `5` | |
 | gaps_out | Gaps between windows and monitor edges | css_gaps | `20` | |
 | gaps_workspaces | Gaps between workspaces. Stacks with gaps_out | int | `0` | [0 - 100] |
@@ -119,7 +119,7 @@ Category: `decoration`
 | dim_strength | How much inactive windows should be dimmed | float | `0.5` |[0.0 - 1.0] |
 | fullscreen_opacity | Opacity of fullscreen windows | float | `1.0` | [0.0 - 1.0] |
 | inactive_opacity | Opacity of inactive windows | float | `1.0` | [0.0 - 1.0] |
-| rounding | Rounded corners' radius (in layout px) | int | `0` | [0 - 100] |
+| rounding | Rounded corners' radius (in layout px) | int / `{ top_left?, top_right?, bottom_left?, bottom_right?}` | `0` | [0 - 100] |
 | rounding_power | Adjusts the curve used for rounding corners, larger is smoother, 1.0 is a triangular corner, 2.0 is a circle, 4.0 is a squircle | float | `2.0` | [1.0 - 10.0] |
 | screen_shader | A path to a custom shader to be applied at the end of rendering. See `examples/screenShader.frag` for an example | string | [[Empty]] | |
 
@@ -162,6 +162,7 @@ Category: `decoration.blur`
 | passes | The amount of passes to perform | int | `1` | [0 - 10] |
 | popups | Whether to blur popups, e.g. `right-click menus` | bool | `false` | |
 | popups_ignorealpha | Works like ignore_alpha in layer rules. If pixel opacity is below the set value, will not blur | float | `0.2` | [0.0 - 1.0] |
+| proportional | If enabled, blur strength will be proportional to pixel opacity. Requires `render:use_shader_blur_blend` | bool | `false` | |
 | size | Blur size (distance) | int | `8` | |
 | special | Whether to blur behind the special workspace (note: expensive) | bool | `false` | |
 | variant | Blur pattern variant. May significantly increase GPU and CPU usage | string | `kawase` | [see below](#blur-variants) |
@@ -173,6 +174,8 @@ Category: `decoration.blur`
 > `blur.size` and `blur.passes` have to be at least 1 to apply blur.
 >
 > Increasing `blur.passes` is necessary to prevent blur looking wrong on higher `blur.size` values, but remember that higher `blur.passes` will place more strain on the GPU.
+>
+> If blur doesn't work in certain windows when enabled, it might be controlled by the client settings. See [FAQ](../../../faq/#blur).
 
 ##### Blur variants
 
@@ -318,8 +321,8 @@ Category: `decoration.glow`
 | Name | Description | Type | Default | Limits |
 | --- | --- | --- | --- | --- |
 | enabled | Enable inner glow on windows | bool | `false` | |
-| color | Active window glow's color. Alpha dictates opacity | color | `0xee1a1a1a` | |
-| color_inactive | Inactive window glow's color. If not set, will fall back to `color` | color | [[Empty]] | |
+| color | Active window glow's color. Alpha dictates opacity | gradient | `0xee1a1a1a` | |
+| color_inactive | Inactive window glow's color. If not set, will fall back to `color` | gradient | [[Empty]] | |
 | range | Glow range (size) in pixels | int | `10` | [0 - 100] |
 | render_power | In what power to render the falloff. More power, the faster the falloff | int | `3` | [1 - 4] |
 
@@ -343,7 +346,7 @@ Category: `decoration.wobble`
 | stiffness | spring stiffness for wobble deformation | float | `200` | [0.0001 - 1000] |
 | damping | spring damping for wobble deformation | float | `12` | [0 - 1000] |
 | mass | spring mass for wobble deformation | float | `1` | [0.0001 - 1000] |
-| intensity | wobble deformation impulse multiplier | float | `0.2` |[0 - 3] |
+| intensity | wobble deformation impulse multiplier | float | `0.2` | [0 - 2] |
 | value_epsilon | position epsilon below which wobble is considered stable | float | `0.25` | [0 - 100] |
 | velocity_epsilon | velocity epsilon below which wobble is considered stable | float | `2` | [0 - 1000] |
 
@@ -393,7 +396,8 @@ Category: `input`
 | scroll_method | Sets the scroll method. Additional info: [libinput#scrolling](https://wayland.freedesktop.org/libinput/doc/latest/scrolling.html). Options: `"2fg"`/`"edge"`/`"on_button_down"`/`"no_scroll"` (2fg - 2 fingers) | string | [[Empty]] | |
 | scroll_factor | Multiplier added to scroll movement for external mice. Note that there is a separate setting for [touchpad scroll_factor](#touchpad)  | float | `1.0` | [0 - 100] |
 | sensitivity | Sets the mouse input sensitivity. Additional info: [libinput#pointer-acceleration](https://wayland.freedesktop.org/libinput/doc/latest/pointer-acceleration.html#pointer-acceleration) | float | `0.0` | [-1.0 - 1.0] |
-| special_fallthrough | if enabled, having only floating windows in the special workspace will not block focusing windows in the regular workspace | bool | `false` | |
+| special_fallthrough | If enabled, having only floating windows in the special workspace will not block focusing windows in the regular workspace | bool | `false` | |
+| swallow_focus_click | If enabled, the first click on unfocused window will focus it without forwarding the click action. Only relevant when mouse focus is detached, e.g. `input.follow_mouse` is `0` or `2` | bool | `false` | |
 
 ##### XKB keymap params
 
@@ -473,11 +477,11 @@ Category: `input.tablet`
 | output | The monitor to bind tablets. Can be `"current"` or a monitor name. Leave empty to map across all monitors | string | [[Empty]] | |
 | transform | Transform the input from tablets. The possible transformations are the same as [those of the monitors](../monitors/positioning#rotation) | int | `0` | [0 - 6] |
 | absolute_region_position | Whether to treat the `region_position` as an absolute position in monitor layout. Only applies when `output` is empty | bool | `false` | |
-| active_area_position | Position of the active area in mm | vec2 | `{0, 0}` | |
-| active_area_size | Size of tablet's active area in mm | vec2 | `{0, 0}` | |
+| active_area_position | Position of the active area in mm | vec2 | `{0, 0}` | [0 - 5000] |
+| active_area_size | Size of tablet's active area in mm | vec2 | `{0, 0}` | [0 - 5000] |
 | left_handed | If enabled, the tablet will be rotated 180 degrees | bool | `false` | |
-| region_position | Position of the mapped region in monitor layout relative to the top left corner of the bound monitor or all monitors | vec2 | `{0, 0}` | |
-| region_size | Size of the mapped region. When this variable is set, tablet input will be mapped to the region. `{0, 0}` or invalid size means unset | vec2 | `{0, 0}` | |
+| region_position | Position of the mapped region in monitor layout relative to the top left corner of the bound monitor or all monitors | vec2 | `{0, 0}` | [-100000 - 100000] |
+| region_size | Size of the mapped region. When this variable is set, tablet input will be mapped to the region. `{0, 0}` or invalid size means unset | vec2 | `{0, 0}` | [1 - 100000] |
 | relative_input | Whether the input should be relative | bool | `false` | |
 
 #### Tablettool
@@ -543,10 +547,10 @@ Category: `group.col`
 
 | Name | Description | Type | Default | Limits |
 | --- | --- | --- | --- | --- |
-| border_active | Active group border color | gradient | `0x66ffff00` | |
-| border_inactive | Inactive group border color | gradient | `0x66777700` | |
-| border_locked_active | Active locked group border color | gradient | `0x66ff5500` | |
-| border_locked_inactive | Inactive locked group border color | gradient | `0x66775500` | |
+| border_active | Active group border color. Has additional `whole_monitor? = bool` parameter in the gradient | gradient | `0x66ffff00` | |
+| border_inactive | Inactive group border color. Has additional `whole_monitor? = bool` parameter in the gradient | gradient | `0x66777700` | |
+| border_locked_active | Active locked group border color. Has additional `whole_monitor? = bool` parameter in the gradient | gradient | `0x66ff5500` | |
+| border_locked_inactive | Inactive locked group border color. Has additional `whole_monitor? = bool` parameter in the gradient | gradient | `0x66775500` | |
 
 #### Groupbar
 
@@ -628,8 +632,7 @@ Category: `misc`
 | initial_workspace_token_timeout | the time in seconds a window has to open on its invoked workspace before the tracking token expires. | int | `10` | [1 - 3600] |
 | initial_workspace_tracking | If enabled, windows will open on the workspace they were invoked on. 0 - disabled, 1 - single-shot, 2 - persistent (all children too) | int | `1` | |
 | key_press_enables_dpms | If DPMS is set to off, wake up the monitors if a key is pressed | bool | `false` | |
-| layers_hog_keyboard_focus | If true, will make keyboard-interactive layers keep their focus on mouse move, e.g. `wofi`, `bemenu` | bool | `true` | |
-| lockdead_screen_delay | Delay in ms after which the "lockdead" screen will appear in case a locks creen app fails to cover all the outputs | int | `1000` | [0 - 5000] |
+| lockdead_screen_delay | Delay in ms after which the "lockdead" screen will appear in case a lock screen app fails to cover all the outputs | int | `1000` | [0 - 5000] |
 | middle_click_paste | Whether to enable middle-click-paste (aka primary selection) | bool | `true` | |
 | mouse_move_enables_dpms | If DPMS is set to off, wake up the monitors if the mouse moves | bool | `false` | |
 | mouse_move_focuses_monitor | Whether mouse moving into a different monitor should focus it | bool | `true` | |
@@ -651,6 +654,16 @@ Category: `misc.col`
 | --- | --- | --- | --- | --- |
 | splash | Changes the color of the splash text (requires a monitor reload to take effect) | color | `0x55ffffff` | |
 
+
+### Layers
+
+Category: `layers`
+
+| Name | Description | Type | Default | Limits |
+| --- | --- | --- | --- | --- |
+| allow_new_top_layers_over_existing_fullscreen | If false, newly mapped layers are not allowed to render over existing covering fullscreen window. Note that fullscreen hides all pre-existing top layers regardless of this setting | bool | `true` | |
+| layers_hog_keyboard_focus | If true, will make keyboard-interactive layers keep their focus on mouse move, e.g. `wofi`, `bemenu` | bool | `true` | |
+
 ### Layout
 
 Category: `layout`
@@ -667,9 +680,11 @@ Category: `binds`
 | Name | Description | Type | Default | Limits |
 | --- | --- | --- | --- | --- |
 | allow_pin_fullscreen | If enabled, allow fullscreen to pinned windows, and restore their pinned status afterwards | bool | `false` | |
+| client_requested_fs_uses_layout_handler | If false, client requested FS will use default FS handler | bool | `true` | |
 | allow_workspace_cycles | If enabled, workspaces don't forget their previous workspace, so cycles can be created by switching to the first workspace in a sequence, then endlessly going to the previous workspace | bool | `false` | |
 | disable_keybind_grabbing | If enabled, apps that request keybinds to be disabled, e.g. `VMs`, will not be able to do so | bool | `false` | |
 | drag_threshold | Movement threshold in pixels for window dragging and `click`/`drag` bind flags. `0` means disabled | int | `0` | [0 - ...] |
+| drag_center_window | Whether to center the window on the pointer, or use the initial hotspot | bool | true | |
 | focus_preferred_method | Sets the preferred focus finding method when using `hl.dsp.focus({ direction })`/`hl.dsp.window.move({ direction })`/etc. `0` - most recent active window has priority, `1` - longer shared edges have priority) | int | `0` | [0 - 1] |
 | hide_special_on_workspace_change | If enabled, changing the active workspace (including to itself) will hide the special workspace on the monitor where the newly active workspace resides | bool | `false` | |
 | ignore_group_lock | If enabled, dispatchers like `hl.dsp.window.move({ into_group })` and `hl.dsp.window.move({ out_of_group })` will ignore lock per group | bool | `false` | |
@@ -787,8 +802,8 @@ Category: `input-capture`
 
 | Name | Description | Type | Default | Limits |
 | --- | --- | --- | --- | --- |
-| capture_modifiers | if enabled, modifiers are also captured and sent to the program | bool | `false` | |
-| enforce_barriers | if enabled, throw a Wayland error when an invalid barrier is received | bool | `true` | |
+| capture_modifiers | If enabled, modifiers are also captured and sent to the program | bool | `false` | |
+| enforce_barriers | If enabled, throw a Wayland error when an invalid barrier is received | bool | `true` | |
 
 ### Debug
 
